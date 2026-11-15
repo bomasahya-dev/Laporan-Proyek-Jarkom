@@ -1026,7 +1026,9 @@ write memory
 
     ```show ip interface brief```
 
-    <img width="750" height="auto" alt="Status Tunnel0 R-PUSAT dan R-PELABUHAN" src="img/soal2-6/soal6_01_tunnel_status.png" />
+    <img width="750" height="auto" alt="Status Tunnel0 R-PUSAT dan R-PELABUHAN" src="img/soal6-7/soal6_01a_tunnel_pusat.png" />   
+    
+    <img width="750" height="auto" alt="Status Tunnel0 R-PUSAT dan R-PELABUHAN" src="img/soal6-7/soal6_01b_tunnel_pelabuhan.png" />   
 
     Dari `show ip interface brief`, terlihat `Tunnel0` pada `R-PUSAT` (`192.168.12.1`) dan `R-PELABUHAN` (`192.168.12.2`) sudah aktif (`up/up`), sehingga terowongan logis antar kedua router siap melewatkan paket.
 
@@ -1034,7 +1036,9 @@ write memory
 
     ```show ip route static```
 
-    <img width="750" height="auto" alt="Static Route Tunnel0" src="img/soal2-6/soal6_02_route_tunnel.png" />
+    <img width="750" height="auto" alt="Static Route Tunnel0" src="img/soal6-7/soal6_02_route_tunnel_pusat.png" />   
+    
+    <img width="750" height="auto" alt="Status Tunnel0 R-PUSAT dan R-PELABUHAN" src="img/soal6-7/soal6_02_route_tunnel_pelabuhan.png" />   
 
     Pada `R-PUSAT` terdapat rute statis menuju jaringan Pelabuhan (`10.96.128.0/17`) via `192.168.12.2`, sedangkan pada `R-PELABUHAN` terdapat rute statis menuju jaringan Balai Kota (`10.99.0.0/20`) via `192.168.12.1`.
 
@@ -1045,14 +1049,16 @@ write memory
 
     ```ping 10.96.160.11```
 
-    <img width="750" height="auto" alt="Ping Balai Kota ke Pelabuhan via GRE" src="img/soal2-6/soal6_03_ping_gre.png" />
+    <img width="750" height="auto" alt="Ping Balai Kota ke Pelabuhan via GRE" src="img/soal6-7/soal6_04_ping_gre_pusat_ke_pelabuhan.png" />   
 
   - Tes jalur paket (`tracert`) untuk membuktikan enkapsulasi GRE:
     Dari `PC-Pegawai-Bk` (`10.99.0.11`) ke `PC-Kantor-Pelabuhan` (`10.96.160.11`), paket seharusnya langsung melompat melewati ujung tunnel `192.168.12.2` tanpa menampilkan hop router perantara `R-UTARA`:
 
     ```tracert 10.96.160.11```
 
-    <img width="750" height="auto" alt="Tracert Balai Kota ke Pelabuhan via GRE" src="img/soal2-6/soal6_04_tracert_gre.png" />
+    <img width="750" height="auto" alt="Tracert Balai Kota ke Pelabuhan via GRE" src="img/soal6-7/soal6_04_tracert_gre_pusat_ke_pelabuhan.png" />   
+    
+    <img width="750" height="auto" alt="Status Tunnel0 R-PUSAT dan R-PELABUHAN" src="img/soal6-7/soal6_05_tracert_gre_pelabuhan_ke_pusat.png" />   
 
     Dari hasil `tracert` di atas, paket keluar melalui gateway `10.99.0.1` (`R-PUSAT`), lalu langsung melompat ke IP tunnel `192.168.12.2` (`R-PELABUHAN`) dan tiba di `10.96.160.11`. Alamat IP fisik `R-UTARA` (`10.98.194.2` dan `10.96.192.1`) tidak terlihat karena paket terenkapsulasi di dalam header GRE selama melintasi jaringan Utara.
 
@@ -1241,23 +1247,33 @@ exit
 end
 write memory
 ```
-#### Pengujian Soal 7 (Dynamic Routing OSPF & Link Cadangan L7)
+### Bukti Pengujian Soal 7 (Dynamic Routing OSPF & Link Cadangan L7)
 
-- **Pengujian di CLI Router (`R-PUSAT` dan `R-UTARA`)**
+- **Topologi Redundansi Link Cadangan L7 (`R-DC` $\leftrightarrow$ `R-UTARA`)**
+
+  Memastikan kabel *Copper Cross-Over* baru (**L7 `10.99.8.32/30`**) menghubungkan `R-DC` (`Fa7/0`: `10.99.8.33`) dan `R-UTARA` (`Fa8/0`: `10.99.8.34`) dengan kedua lampu indikator menyala hijau pada file `K12_CIDR_OSPF.pkt`:
+
+  <img width="750" height="auto" alt="Topologi Link Cadangan L7" src="img/soal6-7/soal7_00_topologi_l7.png.png" />
+
+  Dari tampilan topologi di atas, jalur segitiga redundansi antara `R-PUSAT`, `R-DC`, dan `R-UTARA` telah aktif secara fisik.
+
+- **Pengujian di CLI Router (`R-PUSAT`, `R-UTARA`, dan `R-DC`)**
 
   - Memastikan seluruh tetangga OSPF (*OSPF adjacency*) mencapai status **`FULL`**:
 
     ```show ip ospf neighbor```
 
-    <img width="750" height="auto" alt="OSPF Neighbor R-PUSAT dan R-UTARA" src="img/soal7/soal7_01_ospf_neighbor.png" />
+    <img width="750" height="auto" alt="OSPF Neighbor R-PUSAT" src="img/soal6-7/soal7_01a_ospf_neighbor_pusat.png" />
 
-    Dari hasil `show ip ospf neighbor`, `R-PUSAT` telah membentuk *adjacency* dengan 5 router cabang berstatus `FULL` (`2.2.2.2`, `3.3.3.3`, `5.5.5.5`, `6.6.6.6`, dan `7.7.7.7`), sedangkan `R-UTARA` memiliki 3 tetangga OSPF berstatus `FULL` (`1.1.1.1` via L2, `2.2.2.2` via L7, dan `4.4.4.4` via L6).
+    <img width="750" height="auto" alt="OSPF Neighbor R-UTARA dan R-DC" src="img/soal6-7/soal7_01b_ospf_neighbor_utara.png" />   
+    <img width="750" height="auto" alt="OSPF Neighbor R-UTARA dan R-DC" src="img/soal6-7/soal7_01b_ospf_neighbor_dc.png" />
+    Dari hasil `show ip ospf neighbor`, `R-PUSAT` telah membentuk *adjacency* dengan 5 router cabang berstatus `FULL` (`2.2.2.2`, `3.3.3.3`, `5.5.5.5`, `6.6.6.6`, dan `7.7.7.7`), `R-UTARA` memiliki 3 tetangga OSPF berstatus `FULL` (`1.1.1.1` via L2, `2.2.2.2` via L7, dan `4.4.4.4` via L6), serta `R-DC` memiliki 2 tetangga OSPF berstatus `FULL` (`1.1.1.1` via L1 dan `3.3.3.3` via L7).
 
   - Memastikan tabel routing mempelajari seluruh jaringan cabang secara dinamis dengan kode rute **`O`** serta menerima rute default eksternal **`O*E2 0.0.0.0/0`** dari `R-PUSAT`:
 
     ```show ip route ospf```
 
-    <img width="750" height="auto" alt="Tabel Routing OSPF" src="img/soal7/soal7_02_route_ospf.png" />
+    <img width="750" height="auto" alt="Tabel Routing OSPF" src="img/soal6-7/soal7_02_route_ospf.png" />
 
     Seluruh segmen LAN dan link antar-cabang telah masuk secara otomatis ke dalam tabel routing tanpa menggunakan rute statis antar-cabang.
 
@@ -1268,7 +1284,7 @@ write memory
 
     ```tracert 8.8.8.8```
 
-    <img width="750" height="auto" alt="Tracert Normal via L2" src="img/soal7/soal7_03_tracert_normal_l2.png" />
+    <img width="750" height="auto" alt="Tracert Normal via L2" src="img/soal6-7/soal7_03_tracert_normal_l2.png" />
 
     Dalam kondisi normal, paket melewati jalur utama L2 karena memiliki metrik (*cost*) terendah: `10.98.192.1` (`R-UTARA`) $\rightarrow$ `10.98.194.1` (`R-PUSAT`) $\rightarrow$ `203.0.113.49` (`R-ISP`) $\rightarrow$ `8.8.8.8`.
 
@@ -1277,6 +1293,6 @@ write memory
 
     ```tracert 8.8.8.8```
 
-    <img width="750" height="auto" alt="Tracert Failover via L7" src="img/soal7/soal7_04_tracert_failover_l7.png" />
+    <img width="750" height="auto" alt="Tracert Failover via L7" src="img/soal6-7/soal7_04_tracert_failover_l7.png" />
 
     Dari hasil `tracert` di atas, setelah link L2 terputus, OSPF secara otomatis melakukan konvergensi dan mengalihkan lalu lintas dari `R-UTARA` melalui **Link Cadangan L7 (`10.99.8.33` / `R-DC`)** $\rightarrow$ **L1 (`10.98.64.1` / `R-PUSAT`)** $\rightarrow$ **`203.0.113.49` (`R-ISP`)** $\rightarrow$ **`8.8.8.8`**, membuktikan mekanisme redundansi dan *failover* dinamis berjalan dengan baik.
