@@ -1082,4 +1082,201 @@ Pada file terpisah **`K12_CIDR_OSPF.pkt`**, seluruh rute statis antar-cabang dih
 -- Skrip CLI OSPF per Router
 
 ```ios
+!----- R-PUSAT -----
+enable
+configure terminal
+no ip route 10.98.0.0 255.255.128.0 10.98.64.2
+no ip route 10.98.128.0 255.255.128.0 10.98.194.2
+no ip route 10.97.128.0 255.255.128.0 10.97.192.2
+no ip route 10.97.0.0 255.255.128.0 10.97.64.2
+no ip route 10.96.0.0 255.255.128.0 10.96.64.2
+router ospf 1
+ router-id 1.1.1.1
+ passive-interface FastEthernet0/0
+ passive-interface Vlan1
+ passive-interface Vlan20
+ passive-interface Tunnel0
+ network 10.98.64.0 0.0.0.3 area 0
+ network 10.98.194.0 0.0.0.3 area 0
+ network 10.97.192.0 0.0.0.3 area 0
+ network 10.97.64.0 0.0.0.3 area 0
+ network 10.96.64.0 0.0.0.3 area 0
+ network 10.99.0.0 0.0.7.255 area 0
+ network 10.99.8.0 0.0.0.31 area 0
+ default-information originate
+exit
+end
+write memory
 ```
+```ios
+!----- R-DC (Penambahan Link L7 & OSPF) -----
+enable
+configure terminal
+interface FastEthernet7/0
+ description L7 CADANGAN KE R-UTARA
+ ip address 10.99.8.33 255.255.255.252
+ no shutdown
+exit
+no ip route 0.0.0.0 0.0.0.0 10.98.64.1
+router ospf 1
+ router-id 2.2.2.2
+ passive-interface FastEthernet6/0
+ passive-interface FastEthernet1/0
+ network 10.98.64.0 0.0.0.3 area 0
+ network 10.99.8.32 0.0.0.3 area 0
+ network 10.98.0.0 0.0.31.255 area 0
+ network 10.98.32.0 0.0.0.255 area 0
+exit
+end
+write memory
+```
+```ios
+!----- R-DC (Penambahan Link L7 & OSPF) -----
+enable
+configure terminal
+interface FastEthernet7/0
+ description L7 CADANGAN KE R-UTARA
+ ip address 10.99.8.33 255.255.255.252
+ no shutdown
+exit
+no ip route 0.0.0.0 0.0.0.0 10.98.64.1
+router ospf 1
+ router-id 2.2.2.2
+ passive-interface FastEthernet6/0
+ passive-interface FastEthernet1/0
+ network 10.98.64.0 0.0.0.3 area 0
+ network 10.99.8.32 0.0.0.3 area 0
+ network 10.98.0.0 0.0.31.255 area 0
+ network 10.98.32.0 0.0.0.255 area 0
+exit
+end
+write memory
+```
+```ios
+!----- R-UTARA (Penambahan Link L7 & OSPF) -----
+enable
+configure terminal
+interface FastEthernet8/0
+ description L7 CADANGAN KE R-DC
+ ip address 10.99.8.34 255.255.255.252
+ no shutdown
+exit
+no ip route 0.0.0.0 0.0.0.0 10.98.194.1
+no ip route 10.96.128.0 255.255.128.0 10.96.192.2
+router ospf 1
+ router-id 3.3.3.3
+ passive-interface FastEthernet1/0
+ passive-interface FastEthernet6/0
+ network 10.98.194.0 0.0.0.3 area 0
+ network 10.96.192.0 0.0.0.3 area 0
+ network 10.99.8.32 0.0.0.3 area 0
+ network 10.98.128.0 0.0.63.255 area 0
+ network 10.98.192.0 0.0.1.255 area 0
+exit
+end
+write memory
+```
+```ios
+!----- R-PELABUHAN -----
+enable
+configure terminal
+no ip route 0.0.0.0 0.0.0.0 10.96.192.1
+router ospf 1
+ router-id 4.4.4.4
+ passive-interface FastEthernet0/1
+ passive-interface Ethernet1/0
+ passive-interface Tunnel0
+ network 10.96.192.0 0.0.0.3 area 0
+ network 10.96.128.0 0.0.31.255 area 0
+ network 10.96.160.0 0.0.0.127 area 0
+exit
+end
+write memory
+```
+```ios
+!----- R-SELATAN -----
+enable
+configure terminal
+no ip route 0.0.0.0 0.0.0.0 10.97.192.1
+router ospf 1
+ router-id 5.5.5.5
+ passive-interface FastEthernet1/0
+ passive-interface FastEthernet6/0
+ network 10.97.192.0 0.0.0.3 area 0
+ network 10.97.128.0 0.0.31.255 area 0
+ network 10.97.160.0 0.0.0.127 area 0
+exit
+end
+write memory
+```
+```ios
+!----- R-TIMUR -----
+enable
+configure terminal
+no ip route 0.0.0.0 0.0.0.0 10.97.64.1
+router ospf 1
+ router-id 6.6.6.6
+ passive-interface FastEthernet1/0
+ passive-interface FastEthernet6/0
+ network 10.97.64.0 0.0.0.3 area 0
+ network 10.97.0.0 0.0.31.255 area 0
+ network 10.97.32.0 0.0.3.255 area 0
+exit
+end
+write memory
+```
+```ios
+!----- R-BARAT -----
+enable
+configure terminal
+no ip route 0.0.0.0 0.0.0.0 10.96.64.1
+router ospf 1
+ router-id 7.7.7.7
+ passive-interface FastEthernet1/0
+ passive-interface FastEthernet6/0
+ network 10.96.64.0 0.0.0.3 area 0
+ network 10.96.0.0 0.0.31.255 area 0
+ network 10.96.32.0 0.0.0.255 area 0
+exit
+end
+write memory
+```
+#### Pengujian Soal 7 (Dynamic Routing OSPF & Link Cadangan L7)
+
+- **Pengujian di CLI Router (`R-PUSAT` dan `R-UTARA`)**
+
+  - Memastikan seluruh tetangga OSPF (*OSPF adjacency*) mencapai status **`FULL`**:
+
+    ```show ip ospf neighbor```
+
+    <img width="750" height="auto" alt="OSPF Neighbor R-PUSAT dan R-UTARA" src="img/soal7/soal7_01_ospf_neighbor.png" />
+
+    Dari hasil `show ip ospf neighbor`, `R-PUSAT` telah membentuk *adjacency* dengan 5 router cabang berstatus `FULL` (`2.2.2.2`, `3.3.3.3`, `5.5.5.5`, `6.6.6.6`, dan `7.7.7.7`), sedangkan `R-UTARA` memiliki 3 tetangga OSPF berstatus `FULL` (`1.1.1.1` via L2, `2.2.2.2` via L7, dan `4.4.4.4` via L6).
+
+  - Memastikan tabel routing mempelajari seluruh jaringan cabang secara dinamis dengan kode rute **`O`** serta menerima rute default eksternal **`O*E2 0.0.0.0/0`** dari `R-PUSAT`:
+
+    ```show ip route ospf```
+
+    <img width="750" height="auto" alt="Tabel Routing OSPF" src="img/soal7/soal7_02_route_ospf.png" />
+
+    Seluruh segmen LAN dan link antar-cabang telah masuk secara otomatis ke dalam tabel routing tanpa menggunakan rute statis antar-cabang.
+
+- **Pengujian Failover Otomatis Saat Link Utama L2 Diputus**
+
+  - **Kondisi Normal (Link L2 Aktif):**
+    Dari `PC-Sensor-Lalin` (`10.98.192.11`) dilakukan `tracert` menuju internet (`8.8.8.8`):
+
+    ```tracert 8.8.8.8```
+
+    <img width="750" height="auto" alt="Tracert Normal via L2" src="img/soal7/soal7_03_tracert_normal_l2.png" />
+
+    Dalam kondisi normal, paket melewati jalur utama L2 karena memiliki metrik (*cost*) terendah: `10.98.192.1` (`R-UTARA`) $\rightarrow$ `10.98.194.1` (`R-PUSAT`) $\rightarrow$ `203.0.113.49` (`R-ISP`) $\rightarrow$ `8.8.8.8`.
+
+  - **Simulasi Putus Jalur Utama L2 & Konvergensi ke Link Cadangan L7:**
+    Antarmuka `FastEthernet0/0` (L2) pada `R-UTARA` dinonaktifkan (`shutdown`) untuk mensimulasikan gangguan pada jalur utama, kemudian dijalankan kembali `tracert 8.8.8.8` dari `PC-Sensor-Lalin`:
+
+    ```tracert 8.8.8.8```
+
+    <img width="750" height="auto" alt="Tracert Failover via L7" src="img/soal7/soal7_04_tracert_failover_l7.png" />
+
+    Dari hasil `tracert` di atas, setelah link L2 terputus, OSPF secara otomatis melakukan konvergensi dan mengalihkan lalu lintas dari `R-UTARA` melalui **Link Cadangan L7 (`10.99.8.33` / `R-DC`)** $\rightarrow$ **L1 (`10.98.64.1` / `R-PUSAT`)** $\rightarrow$ **`203.0.113.49` (`R-ISP`)** $\rightarrow$ **`8.8.8.8`**, membuktikan mekanisme redundansi dan *failover* dinamis berjalan dengan baik.
